@@ -60,3 +60,21 @@ node_identifier = str(uuid4()).replace('-', '')
 
 # Instantiate the Blockchain
 blockchain = Blockchain()
+
+@app.route('/chain', methods=['GET'])
+def full_chain():
+    response = {
+        'length': len(blockchain.chain),
+        'chain': blockchain.chain,
+    }
+    return jsonify(response), 200
+
+@app.route('/last_block', methods=['GET'])
+def get_last_block():
+    response = blockchain.last_block()
+    return jsonify(response), 200
+
+
+# Run the program on port 5000
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
