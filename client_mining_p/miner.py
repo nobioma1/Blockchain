@@ -4,6 +4,8 @@ import requests
 import sys
 import json
 
+import time
+
 
 def proof_of_work(block):
     """
@@ -65,8 +67,10 @@ if __name__ == '__main__':
             print(r)
             break
 
+        start_time = time.time()
         # Get the block from `data` and use it to look for a new proof
         new_proof = proof_of_work(last_block)
+        duration = time.time() - start_time
 
         # When found, POST it to the server {"proof": new_proof, "id": id}
         post_data = {"proof": new_proof, "id": id}
@@ -82,5 +86,6 @@ if __name__ == '__main__':
 
             coins_mined += 1
             print(f"Total coins mined: {coins_mined}")
+            print(f"Took {duration} to mine this coin")
         else:
             print(data.get('message'))
