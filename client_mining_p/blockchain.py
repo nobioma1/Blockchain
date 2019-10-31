@@ -81,6 +81,34 @@ node_identifier = str(uuid4()).replace('-', '')
 # Instantiate the Blockchain
 blockchain = Blockchain()
 
+
+@app.route('/mine', methods=['POST'])
+def mine():
+    data = request.get_json()
+    if not data or (not 'proof' in data and not 'id' in data):
+        return jsonify({'message': "'proof' and 'id' fields are required"}), 400
+
+    block_str = json.dumps(blockchain.last_block, sort_keys=True)
+    is_valid = blockchain.valid_proof(block_str, data.get('proof'))
+
+    if is_valid:
+        # Forge the new Block by adding it to the chain with the proof
+        previous_hash = blockchain.hash(blockchain.last_block)
+        block = blockchain.new_block(data.get('proof'), previous_hash)
+
+        response = {
+            'message': "New Block Forged",
+            'index': block['index'],
+            'transactions': block['transactions'],
+            'proof': block['proof'],
+            'previous_hash': block['previous_hash'],
+        }
+
+        return jsonify(response), 200
+
+    return jsonify({'error': "Invalid proof"}), 400
+
+
 @app.route('/chain', methods=['GET'])
 def full_chain():
     response = {
@@ -89,9 +117,10 @@ def full_chain():
     }
     return jsonify(response), 200
 
+
 @app.route('/last_block', methods=['GET'])
 def get_last_block():
-    response = blockchain.last_block()
+    response = blockchain.last_block
     return jsonify(response), 200
 
 
